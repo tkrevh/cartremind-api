@@ -1,0 +1,40 @@
+language: python
+services:
+  - postgresql
+  - redis-server
+python:
+  - "2.7"
+before_script:
+- export DATABASE_URL=postgres://postgres@localhost/trackosaurus
+- export DJANGO_SECRET=`openssl rand -base64 32`
+- psql -c 'CREATE DATABASE "trackosaurus";' -U postgres
+install:
+  - "pip install -r requirements/test.txt"
+script:
+  - ./trackosaurus/manage.py test trackosaurus
+after_success:
+  - coveralls
+
+deploy:
+  provider: heroku
+  app:
+    master: trackosaurus-dev
+    qa: trackosaurus-qa
+    prod: trackosaurus-prod
+  on:
+    repo: tkrevh/trackosaurus
+  run:
+    - "./trackosaurus/manage.py migrate"
+
+notifications:
+  email: false
+
+# This reportedly works around an issue downloading packages from pypi on
+# travis. Consider removing this after the underlying issue is fixed.
+# https://github.com/travis-ci/travis-ci/issues/2389
+sudo: false
+
+matrix:
+  fast_finish: true
+
+cache: pip

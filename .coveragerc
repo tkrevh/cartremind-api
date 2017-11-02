@@ -1,0 +1,10 @@
+[run]
+branch = True
+omit = *migrations*,
+       *urls*,
+       *test*,
+       *admin*,
+       ./trackosaurus/config/*,
+       ./trackosaurus/manage.py,
+       ./trackosaurus/wsgi.py,
+       *__init__*

@@ -1,0 +1,11 @@
+site_name: trackosaurus
+site_description: ProductHunt Hackaton project, to track website visitors requests to be notified of specific events on any website. Suitable for eCommerce, SaaS, and other user facing websites and apps.
+repo_url: https://github.com/tkrevh/trackosaurus
+site_dir: site
+copyright: Copyright &copy; 2015, <a href="https://github.com/tkrevh">tkrevh</a>.
+
+pages:
+  - Home: 'index.md'
+  - API:
+    - Authentication: 'api/authentication.md'
+    - Users: 'api/users.md'

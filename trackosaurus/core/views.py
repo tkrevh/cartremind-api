@@ -34,7 +34,7 @@ class RecordEventView(APIView):
                 }
             )
 
-        if campaign_event.user.pk != user.pk:
+        if campaign_event.campaign.user.pk != user.pk:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
                 data = {

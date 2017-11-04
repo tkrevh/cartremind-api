@@ -12,8 +12,6 @@ import uuid
 
 class Migration(migrations.Migration):
 
-    replaces = [(b'users', '0001_initial'), (b'users', '0002_auto_20171104_0029'), (b'users', '0003_auto_20171104_0030'), (b'users', '0004_auto_20171104_0053')]
-
     initial = True
 
     dependencies = [
@@ -35,8 +33,8 @@ class Migration(migrations.Migration):
                 ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')),
                 ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to=b'auth.Group', verbose_name='groups')),
-                ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to=b'auth.Permission', verbose_name='user permissions')),
+                ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.Group', verbose_name='groups')),
+                ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.Permission', verbose_name='user permissions')),
                 ('api_key', models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='user', to='users.APIKey')),
             ],
             options={

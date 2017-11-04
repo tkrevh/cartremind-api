@@ -36,7 +36,6 @@ class User(AbstractUser):
         # create an API key for new users
         if not self.api_key:
             self.api_key = APIKey(
-                name='API for {}'.format(self.email),
                 key=generate_key()
             )
             self.api_key.save()

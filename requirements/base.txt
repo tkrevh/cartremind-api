@@ -31,3 +31,6 @@ django-rq==0.9.6
 
 # Time zones support
 pytz==2017.3
+
+# Query inspection
+django-queryinspect==1.0.0

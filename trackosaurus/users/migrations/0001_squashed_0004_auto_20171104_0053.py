@@ -20,6 +20,21 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
+            name='APIKey',
+            fields=[
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ('is_active', models.BooleanField(default=True)),
+                ('created', models.DateTimeField(auto_now_add=True)),
+                ('modified', models.DateTimeField(auto_now=True)),
+                ('name', models.CharField(max_length=50, unique=True)),
+                ('key', models.CharField(max_length=40, unique=True)),
+            ],
+            options={
+                'ordering': ['-created'],
+                'verbose_name_plural': 'API Keys',
+            },
+        ),
+        migrations.CreateModel(
             name='User',
             fields=[
                 ('password', models.CharField(max_length=128, verbose_name='password')),
@@ -45,20 +60,5 @@ class Migration(migrations.Migration):
             managers=[
                 ('objects', django.contrib.auth.models.UserManager()),
             ],
-        ),
-        migrations.CreateModel(
-            name='APIKey',
-            fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('is_active', models.BooleanField(default=True)),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('modified', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=50, unique=True)),
-                ('key', models.CharField(max_length=40, unique=True)),
-            ],
-            options={
-                'ordering': ['-created'],
-                'verbose_name_plural': 'API Keys',
-            },
         ),
     ]

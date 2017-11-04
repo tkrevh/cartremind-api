@@ -1,1 +1,1 @@
-\virtualenv\trackosaurus\Scripts\activate
+\virtualenvs\trackosaurus\Scripts\activate

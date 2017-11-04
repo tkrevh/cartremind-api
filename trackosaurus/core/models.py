@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import uuid
+
 from django.db import models
 
 
@@ -17,6 +19,7 @@ class TimedModel(models.Model):
 
 
 class Campaign(TimedModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey('users.User', related_name='campaigns', null=False, blank=False)
     name = models.CharField(max_length=256, null=False, blank=False)
     base_url = models.CharField(max_length=256, null=False, blank=False)

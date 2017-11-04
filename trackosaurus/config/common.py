@@ -25,7 +25,8 @@ class Common(Configuration):
 
         # Your apps
         'authentication',
-        'users'
+        'users',
+        'core'
 
     )
 
@@ -207,10 +208,12 @@ class Common(Configuration):
         ),
         'DEFAULT_PERMISSION_CLASSES': [
             'rest_framework.permissions.IsAuthenticated',
+            'users.permissions.HasAPIAccess',
         ],
         'DEFAULT_AUTHENTICATION_CLASSES': (
             'rest_framework.authentication.SessionAuthentication',
             'rest_framework.authentication.TokenAuthentication',
+            'users.authentication.ApiKeyAuthentication'
         )
     }
 

@@ -8,7 +8,7 @@ from django.db import models
 
 # Create your models here.
 from core.constants import CAMPAIGN_TYPE_CHOICES
-
+from django.utils.encoding import python_2_unicode_compatible
 
 class TimedModel(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
@@ -18,6 +18,7 @@ class TimedModel(models.Model):
         abstract = True
 
 
+@python_2_unicode_compatible
 class Campaign(TimedModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey('users.User', related_name='campaigns', null=False, blank=False)
@@ -26,12 +27,16 @@ class Campaign(TimedModel):
     description = models.TextField(max_length=1024, null=True, blank=True)
     type = models.PositiveIntegerField(choices=CAMPAIGN_TYPE_CHOICES)
 
+    def __str__(self):
+        return '{}'.format(self.id)
+
     class Meta:
         verbose_name = 'Campaign'
         verbose_name_plural = 'Campaigns'
         ordering = ['-date_created']
 
 
+@python_2_unicode_compatible
 class StandardEvent(TimedModel):
     """
     This is a collection of predefined standard events
@@ -42,12 +47,16 @@ class StandardEvent(TimedModel):
     description = models.CharField(max_length=128, null=True, blank=True)
     type = models.PositiveIntegerField(choices=CAMPAIGN_TYPE_CHOICES)
 
+    def __str__(self):
+        return self.code
+
     class Meta:
         verbose_name = 'Standard Event'
         verbose_name_plural = 'Standard Events'
         ordering = ['-date_created']
 
 
+@python_2_unicode_compatible
 class CampaignEvent(TimedModel):
     """
     Users will be able to click on these events on popup
@@ -57,6 +66,9 @@ class CampaignEvent(TimedModel):
     name = models.CharField(max_length=128, null=False, blank=False)
     description = models.CharField(max_length=128, null=True, blank=True)
     type = models.PositiveIntegerField(choices=CAMPAIGN_TYPE_CHOICES)
+
+    def __str__(self):
+        return self.code
 
     class Meta:
         verbose_name = 'Campaign Event'
@@ -75,6 +87,6 @@ class RecordedEvent(TimedModel):
 
     class Meta:
         verbose_name = 'Recorded Event'
-        verbose_name_plural = 'Recorded Evente'
+        verbose_name_plural = 'Recorded Events'
         ordering = ['-date_created']
 

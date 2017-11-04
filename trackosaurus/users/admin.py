@@ -12,4 +12,10 @@ class UserAdmin(AuthUserAdmin):
 
 @admin.register(APIKey)
 class APIKeyAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('user_email', 'key', 'created')
+
+    def get_queryset(self, request):
+        return APIKey.objects.select_related('user')
+
+    def user_email(self, instance):
+        return instance.user.email

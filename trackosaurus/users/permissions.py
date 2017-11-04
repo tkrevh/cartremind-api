@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from rest_framework.authentication import get_authorization_header
 
 from .models import APIKey
 
@@ -20,5 +21,8 @@ class HasAPIAccess(permissions.BasePermission):
     message = 'Invalid or missing API Key.'
 
     def has_permission(self, request, view):
-        api_key = request.META.get('HTTP_API_KEY', '')
-        return APIKey.objects.filter(key=api_key).exists()
+        try:
+            api_key = request.META.get('HTTP_AUTHORIZATION', ' ').split()[1]
+            return APIKey.objects.filter(key=api_key).exists()
+        except:
+            return False

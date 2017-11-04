@@ -39,5 +39,5 @@ class ApiKeyAuthentication(TokenAuthentication):
         if not token.is_active:
             raise AuthenticationFailed('Api key inactive or deleted.')
 
-        user = token.company.users.first()  # what ever you want here
+        user = token.user
         return (user, token)

@@ -22,6 +22,7 @@ class Common(Configuration):
         'rest_framework.authtoken',  # token authentication
         'django_rq',                 # asynchronous queuing
         'versatileimagefield',       # image manipulation
+        'corsheaders',               # Cross Origin Resource Sharing Headers
 
         # Your apps
         'authentication',
@@ -32,6 +33,7 @@ class Common(Configuration):
 
     # https://docs.djangoproject.com/en/1.10/topics/http/middleware/
     MIDDLEWARE = (
+        'corsheaders.middleware.CorsMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.middleware.common.CommonMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
@@ -259,3 +261,6 @@ class Common(Configuration):
     QUERY_INSPECT_LOG_TRACEBACKS = True
     # Project root (a list of directories, see below - default empty)
     QUERY_INSPECT_TRACEBACK_ROOTS = [BASE_DIR]
+
+    # CORS SETTINGS
+    CORS_ORIGIN_ALLOW_ALL = True

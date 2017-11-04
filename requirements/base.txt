@@ -34,3 +34,6 @@ pytz==2017.3
 
 # Query inspection
 django-queryinspect==1.0.0
+
+# CORS Haders
+django-cors-headers==2.1.0

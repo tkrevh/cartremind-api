@@ -54,12 +54,10 @@ class ListCampaignEventsView(ListAPIView):
     permission_classes = (IsAuthenticated, HasAPIAccess)
 
     def get(self, request, campaign, format=None):
-        data = request.data
         user = request.user
-        campaign_id = data.get('campaign')
 
         campaign_events = CampaignEvent.objects.filter(
-            campaign_id=campaign_id,
+            campaign_id=campaign,
             campaign__user=user
         )
 

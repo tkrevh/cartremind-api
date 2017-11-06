@@ -8,7 +8,7 @@ from django.contrib import admin
 from django.views.generic.base import RedirectView
 from rest_framework.routers import DefaultRouter
 
-from core.views import RecordEventView, ListCampaignEventsView
+from core.views import RecordEventView, ListCampaignEventsView, send_test_notification
 from users.views import UserViewSet
 
 router = DefaultRouter()
@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^api/v1/', include(router.urls)),
     url(r'^api/v1/record-event/(?P<campaign>[-\w]+)/(?P<code>[-\w]+)/$', RecordEventView.as_view()),
     url(r'^api/v1/events/(?P<campaign>[-\w]+)/$', ListCampaignEventsView.as_view()),
+    url(r'^send-test-notification/(?P<recorded_event_id>\d+)/$', send_test_notification, name='send-test-notification'),
 
     # the 'api-root' from django rest-frameworks default router
     # http://www.django-rest-framework.org/api-guide/routers/#defaultrouter

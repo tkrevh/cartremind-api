@@ -39,6 +39,6 @@ django-queryinspect==1.0.0
 django-cors-headers==2.1.0
 
 # Requests
-chardet=3.0.4
-requests=2.18.4
-urllib3=1.22
+chardet==3.0.4
+urllib3==1.22
+requests==2.18.4

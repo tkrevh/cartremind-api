@@ -29,7 +29,7 @@ class APIKey(models.Model):
 @python_2_unicode_compatible
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    api_key = models.OneToOneField(APIKey, null=True, related_name='user')
+    api_key = models.OneToOneField(APIKey, null=True, related_name='user', on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
 

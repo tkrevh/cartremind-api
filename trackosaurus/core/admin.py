@@ -18,14 +18,14 @@ class CampaignAdmin(admin.ModelAdmin):
 @admin.register(StandardEvent)
 class StandardEventAdmin(admin.ModelAdmin):
     list_display = (
-        'code', 'name', 'id', 'description', 'date_modified', 'date_created',
+        'name', 'id', 'description', 'date_modified', 'date_created',
     )
 
 
 @admin.register(CampaignEvent)
 class CampaignEventAdmin(admin.ModelAdmin):
     list_display = (
-        'campaign', 'code', 'name', 'id', 'description', 'date_modified', 'date_created',
+        'campaign', 'name', 'id', 'description', 'date_modified', 'date_created',
     )
 
 

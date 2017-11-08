@@ -8,12 +8,18 @@ from django.shortcuts import redirect
 
 from rest_framework import status, mixins, viewsets
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from users.permissions import HasAPIAccess
-from .serializers import CampaignEventSerializer
+
+from .permissions import IsOwner, IsOwnerOfCampaign
+from .serializers import (
+    CampaignEventSerializer,
+    CampaignSerializer,
+    CreateCampaignSerializer
+)
 from .models import RecordedEvent, CampaignEvent, Campaign
 
 
@@ -21,14 +27,14 @@ from .models import RecordedEvent, CampaignEvent, Campaign
 class RecordEventView(APIView):
     permission_classes = (IsAuthenticated, HasAPIAccess)
 
-    def post(self, request, campaign, code, format=None):
+    def post(self, request, campaign, event_id, format=None):
         data = request.data
         user = request.user
         token = data.get('token')
         try:
             campaign_event = CampaignEvent.objects.get(
                 campaign_id=campaign,
-                code=code
+                pk=event_id
             )
         except CampaignEvent.DoesNotExist:
             return Response(
@@ -93,3 +99,55 @@ def send_test_notification(request, recorded_event_id):
     r = requests.post(URL, data=json.dumps(payload), headers=HEADERS)
     messages.info(request, 'Notification sent')
     return redirect('admin:core_recordedevent_changelist')
+
+
+class CampaignViewSet(mixins.CreateModelMixin,
+                      mixins.ListModelMixin,
+                      mixins.RetrieveModelMixin,
+                      mixins.UpdateModelMixin,
+                      viewsets.GenericViewSet):
+    """
+    Creates, Updates, and retrives Campaigns
+    """
+    queryset = Campaign.objects.all()
+    serializer_class = CampaignSerializer
+    permission_classes = (IsOwner,)
+
+    def get_queryset(self):
+        return Campaign.objects.filter(user=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        self.serializer_class = CreateCampaignSerializer
+        self.permission_classes = (IsAuthenticated,)
+        return super(CampaignViewSet, self).create(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        self.permission_classes = (IsOwner,)
+        return super(CampaignViewSet, self).list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        self.permission_classes = (IsOwner,)
+        return super(CampaignViewSet, self).create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        self.permission_classes = (IsOwner,)
+        return super(CampaignViewSet, self).update(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class CampaignEventViewSet(viewsets.ModelViewSet):
+    """
+    Creates, Updates, and retrives Campaigns
+    """
+    queryset = CampaignEvent.objects.all()
+    serializer_class = CampaignEventSerializer
+    permission_classes = (IsOwnerOfCampaign,)
+
+    def get_queryset(self):
+        return CampaignEvent.objects.filter(campaign_id=self.kwargs['campaign'])
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)

@@ -5,22 +5,21 @@ from .models import User
 
 class UserSerializer(serializers.ModelSerializer):
 
+    api_key = serializers.SerializerMethodField()
+
+    def get_api_key(self, user):
+        return user.api_key.key
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name',)
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'api_key')
         read_only_fields = ('username', )
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
 
-    def create(self, validated_data):
-        # call create_user on user object. Without this
-        # the password will be stored in plain text.
-        user = User.objects.create_user(**validated_data)
-        return user
-
     class Meta:
         model = User
-        fields = ('id', 'username', 'password', 'auth_token')
+        fields = ('id', 'username', 'password', 'email', 'auth_token')
         read_only_fields = ('auth_token',)
         extra_kwargs = {'password': {'write_only': True}}

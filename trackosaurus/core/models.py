@@ -10,6 +10,9 @@ from django.db import models
 from core.constants import CAMPAIGN_TYPE_CHOICES
 from django.utils.encoding import python_2_unicode_compatible
 
+from .constants import CAMPAIGN_TYPE_OTHER
+
+
 class TimedModel(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
@@ -25,10 +28,10 @@ class Campaign(TimedModel):
     name = models.CharField(max_length=256, null=False, blank=False)
     base_url = models.CharField(max_length=256, null=False, blank=False)
     description = models.TextField(max_length=1024, null=True, blank=True)
-    type = models.PositiveIntegerField(choices=CAMPAIGN_TYPE_CHOICES)
+    type = models.PositiveIntegerField(choices=CAMPAIGN_TYPE_CHOICES, default=CAMPAIGN_TYPE_OTHER)
 
     def __str__(self):
-        return '{}'.format(self.id)
+        return '{}'.format(self.name)
 
     class Meta:
         verbose_name = 'Campaign'
@@ -42,13 +45,12 @@ class StandardEvent(TimedModel):
     This is a collection of predefined standard events
     that will be offered to user when creating a campaign
     """
-    code = models.CharField(max_length=16, null=False, blank=False)
     name = models.CharField(max_length=128, null=False, blank=False)
     description = models.CharField(max_length=128, null=True, blank=True)
     type = models.PositiveIntegerField(choices=CAMPAIGN_TYPE_CHOICES)
 
     def __str__(self):
-        return self.code
+        return self.name
 
     class Meta:
         verbose_name = 'Standard Event'
@@ -62,13 +64,12 @@ class CampaignEvent(TimedModel):
     Users will be able to click on these events on popup
     """
     campaign = models.ForeignKey(Campaign, related_name='campaign_events', null=False, blank=False)
-    code = models.CharField(max_length=16, null=False, blank=False)
     name = models.CharField(max_length=128, null=False, blank=False)
     description = models.CharField(max_length=128, null=True, blank=True)
-    type = models.PositiveIntegerField(choices=CAMPAIGN_TYPE_CHOICES)
+    type = models.PositiveIntegerField(choices=CAMPAIGN_TYPE_CHOICES, default=CAMPAIGN_TYPE_OTHER)
 
     def __str__(self):
-        return self.code
+        return self.name
 
     class Meta:
         verbose_name = 'Campaign Event'

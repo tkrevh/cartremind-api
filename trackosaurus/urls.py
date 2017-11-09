@@ -40,7 +40,7 @@ urlpatterns = [
     url(r'^api/v1/login/$', views.obtain_auth_token),
     url(r'^api/v1/userinfo/$', UserInfoView.as_view()),
 
-    url(r'^send-test-notification/(?P<recorded_event_id>\d+)/$', send_test_notification, name='send-test-notification'),
+    url(r'^send-test-notification/(?P<recorded_event_token_id>\d+)/$', send_test_notification, name='send-test-notification'),
 
     # the 'api-root' from django rest-frameworks default router
     # http://www.django-rest-framework.org/api-guide/routers/#defaultrouter

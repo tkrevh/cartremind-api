@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import CampaignEvent, Campaign
+from .models import CampaignEvent, Campaign, EventNotification
 
 
 class CampaignEventSerializer(serializers.ModelSerializer):
@@ -28,4 +28,12 @@ class CreateCampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         fields = ('id', 'name', 'base_url', 'description', )
+        read_only_fields = ('id',)
+
+
+class CreateEventNotificationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = EventNotification
+        fields = ('id', 'title', 'body', 'icon', 'url')
         read_only_fields = ('id',)

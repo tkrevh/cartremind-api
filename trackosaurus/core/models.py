@@ -77,6 +77,7 @@ class CampaignEvent(TimedModel):
         ordering = ['-date_created']
 
 
+@python_2_unicode_compatible
 class RecordedEvent(TimedModel):
     """
     Once user clicks on the event on which he wants to be notified of,
@@ -84,10 +85,64 @@ class RecordedEvent(TimedModel):
     we get a token, which we need to store.
     """
     event = models.ForeignKey(CampaignEvent, related_name='recorded_events', null=False, blank=False)
-    token = models.CharField(max_length=256, null=False, blank=False)
+    url = models.TextField(null=False, blank=False, default="http://placeholder")
+    page_title = models.CharField(max_length=1204, null=False, blank=False, default='page_title')
+
+    def __str__(self):
+        MAX_PAGE_TITLE_DISPLAY_LENGTH = 30
+        shortened_page_title = self.page_title
+        if len(shortened_page_title) > MAX_PAGE_TITLE_DISPLAY_LENGTH:
+            shortened_page_title = '{}...'.format(shortened_page_title[:MAX_PAGE_TITLE_DISPLAY_LENGTH])
+        return '{}/{}'.format(self.event.name, shortened_page_title)
 
     class Meta:
         verbose_name = 'Recorded Event'
         verbose_name_plural = 'Recorded Events'
         ordering = ['-date_created']
+        unique_together = ('event', 'url')
 
+
+class RecordedEventToken(TimedModel):
+    recorded_event = models.ForeignKey(RecordedEvent, related_name='tokens', null=False, blank=False)
+    token = models.CharField(max_length=256, null=False, blank=False)
+
+    class Meta:
+        verbose_name = 'Recorded Event Token'
+        verbose_name_plural = 'Recorded Event Tokens'
+        ordering = ['-date_created']
+        unique_together = ('recorded_event', 'token')
+
+
+class EventNotification(TimedModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    recorded_event = models.ForeignKey(RecordedEvent, related_name='notifications', null=False, blank=False)
+    title = models.CharField(max_length=128, null=False, blank=False)
+    body = models.CharField(max_length=1024, null=False, blank=False)
+    icon = models.ImageField(upload_to='notification_icons', null=False, blank=False)
+    url = models.TextField(null=False, blank=False)
+    number_sent = models.PositiveIntegerField(default=0)
+    number_opened = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        verbose_name = 'Event Notification'
+        verbose_name_plural = 'Event Notifications'
+        ordering = ['-date_created']
+
+
+class SubscriptionPlan(TimedModel):
+    name = models.CharField(max_length=128, null=False, blank=False)
+    external_plan_name = models.CharField(max_length=128, null=True, blank=True)
+    price = models.FloatField(null=False, blank=False)
+    currency = models.CharField(max_length=5, default='usd')
+    max_campaigns = models.PositiveIntegerField(default=1)
+    max_events_per_campaign = models.PositiveIntegerField(default=3)
+    max_notifications_per_event = models.PositiveIntegerField(default=1000)
+    max_notifications_per_day = models.PositiveIntegerField(default=3)
+    powered_by_link_hidden = models.BooleanField(default=False)
+    custom_notification_icon = models.BooleanField(default=False)
+    modify_notification_url = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Subscription Plan'
+        verbose_name_plural = 'Subscription Plans'
+        ordering = ['-date_created']

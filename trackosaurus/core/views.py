@@ -2,6 +2,9 @@
 from __future__ import unicode_literals
 import requests
 import json
+
+from django.core.exceptions import ValidationError
+from django.db import transaction, IntegrityError
 from django.shortcuts import render
 from django.contrib import messages
 from django.shortcuts import redirect
@@ -20,17 +23,33 @@ from .serializers import (
     CampaignSerializer,
     CreateCampaignSerializer
 )
-from .models import RecordedEvent, CampaignEvent, Campaign
+from .models import RecordedEvent, CampaignEvent, Campaign, RecordedEventToken
 
 
 # Create your views here.
 class RecordEventView(APIView):
     permission_classes = (IsAuthenticated, HasAPIAccess)
 
+    def get_or_create_recorded_event(self, campaign_event, url, page_title):
+        try:
+            obj = RecordedEvent.objects.create(
+                event=campaign_event,
+                url=url,
+                page_title=page_title
+            )
+        except (IntegrityError, ValidationError):
+            obj = RecordedEvent.objects.get(
+                event=campaign_event,
+                url=url
+            )
+        return obj
+
     def post(self, request, campaign, event_id, format=None):
         data = request.data
         user = request.user
         token = data.get('token')
+        url = data.get('url')
+        page_title = data.get('title')
         try:
             campaign_event = CampaignEvent.objects.get(
                 campaign_id=campaign,
@@ -52,10 +71,20 @@ class RecordEventView(APIView):
                 }
             )
 
-        RecordedEvent.objects.create(
-            event=campaign_event,
-            token=token
+        recorded_event = self.get_or_create_recorded_event(
+            campaign_event=campaign_event,
+            url=url,
+            page_title=page_title
         )
+        with transaction.atomic():
+            try:
+                RecordedEventToken.objects.create(
+                    recorded_event=recorded_event,
+                    token=token
+                )
+            except IntegrityError:
+                # don't allow duplicate registrations
+                pass
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -76,7 +105,7 @@ class ListCampaignEventsView(ListAPIView):
         return Response(data=data)
 
 
-def send_test_notification(request, recorded_event_id):
+def send_test_notification(request, recorded_event_token_id):
 
     URL = "https://fcm.googleapis.com/fcm/send"
     API_KEY = "AAAAry4xbXQ:APA91bFM6lFskgOsjsPXhdHhdCRA4CafRDw5RNE4RdZjrDeSAgKiTKo0Z9M_spLufLH6rJOUA1xwfnnt0tExqTyig612p3Pu9EiLNcsZj80UHbWA2Dtyu0vyA3jpxblI5vhAgkrQ17dE"
@@ -85,7 +114,7 @@ def send_test_notification(request, recorded_event_id):
         "Authorization": "key={}".format(API_KEY)
     }
 
-    recorded_event = RecordedEvent.objects.get(pk=recorded_event_id)
+    recorded_event_token = RecordedEventToken.objects.get(pk=recorded_event_token_id)
 
     payload = {
        "notification": {
@@ -94,11 +123,11 @@ def send_test_notification(request, recorded_event_id):
          "icon": "https://t6.rbxcdn.com/b76c17b045192b22d881f24d8c4dd813",
          "click_action": "https://www.nike.com/si/en_gb/?cp=euns_kw_bra!si!goo!core!c!b!%2Bnike%20%2Bstore!164850714626&gclid=Cj0KCQiArYDQBRDoARIsAMR8s_TkhWJ_LeU_5Op3RWtBUgAHDEgLdJUOF1qJNhhjXE5LKfhv6WwzcXsaAk4mEALw_wcB&gclsrc=aw.ds"
        },
-       "to": recorded_event.token
+       "to": recorded_event_token.token
      }
     r = requests.post(URL, data=json.dumps(payload), headers=HEADERS)
     messages.info(request, 'Notification sent')
-    return redirect('admin:core_recordedevent_changelist')
+    return redirect('admin:core_recordedeventtoken_changelist')
 
 
 class DashboardView(APIView):

@@ -101,6 +101,34 @@ def send_test_notification(request, recorded_event_id):
     return redirect('admin:core_recordedevent_changelist')
 
 
+class DashboardView(APIView):
+    """
+    View to list all users in the system.
+
+    * Requires token authentication.
+    * Only admin users are able to access this view.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, format=None):
+        user = request.user
+
+        user_campaigns = Campaign.objects.filter(user=user)
+        number_of_campaigns = user_campaigns.count()
+        campaign_events = CampaignEvent.objects.filter(campaign__in=user_campaigns)
+        number_of_campaign_events = campaign_events.count()
+        number_of_registered_signups = RecordedEvent.objects.filter(event__in=campaign_events).count()
+
+        data = {
+            'number_of_campaigns': number_of_campaigns,
+            'number_of_campaign_events': number_of_campaign_events,
+            'number_of_registered_signups': number_of_registered_signups,
+            'number_of_sent_notifications': 0
+        }
+
+        return Response(data)
+
+
 class CampaignViewSet(mixins.CreateModelMixin,
                       mixins.ListModelMixin,
                       mixins.RetrieveModelMixin,
@@ -151,3 +179,6 @@ class CampaignEventViewSet(viewsets.ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         kwargs['partial'] = True
         return self.update(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        serializer.save(campaign=Campaign.objects.get(id=self.kwargs['campaign']))

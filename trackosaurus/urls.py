@@ -9,7 +9,13 @@ from django.views.generic.base import RedirectView
 from rest_framework.routers import DefaultRouter, SimpleRouter
 from rest_framework.authtoken import views
 
-from core.views import RecordEventView, ListCampaignEventsView, send_test_notification, CampaignEventViewSet
+from core.views import (
+    RecordEventView,
+    ListCampaignEventsView,
+    send_test_notification,
+    CampaignEventViewSet,
+    DashboardView
+)
 from users.views import UserViewSet, RegisterUserView, UserInfoView
 from core.views import CampaignViewSet
 
@@ -28,6 +34,7 @@ urlpatterns = [
     url(r'^api/v1/record-event/(?P<campaign>[-\w]+)/(?P<event_id>[-\w]+)/$', RecordEventView.as_view()),
     url(r'^api/v1/events/(?P<campaign>[-\w]+)/$', ListCampaignEventsView.as_view()),
     url(r'^api/v1/campaigns/(?P<campaign>[-\w]+)/', include(campaign_events_router.urls)),
+    url(r'^api/v1/dashboard/$', DashboardView.as_view()),
 
     url(r'^api/v1/register/$', RegisterUserView.as_view()),
     url(r'^api/v1/login/$', views.obtain_auth_token),

@@ -9,6 +9,9 @@ from django.conf import settings
 # os.environ.setdefault("DJANGO_CONFIGURATION", "Production")
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trackosaurus.config.production')
 
+from configurations import importer
+importer.install()
+
 app = Celery('trackosaurus')
 app.conf.update(BROKER_URL=os.environ.get('REDISTOGO_URL', 'redis://127.0.0.1:6379/1'),
                 CELERY_RESULT_BACKEND=os.environ.get('REDISTOGO_URL', 'redis://127.0.0.1:6379/1'))

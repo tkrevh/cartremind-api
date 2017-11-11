@@ -297,10 +297,10 @@ class PostEventNotificationView(APIView):
         )
         if instance.is_valid():
             event_notification = instance.save()
-
-            return Response(
-                data=EventNotificationSerializer(event_notification).data
-            )
+            notification_sent = event_notification.send_notification_to_topic(request)
+            data = EventNotificationSerializer(event_notification).data
+            data['notification_sent'] = notification_sent
+            return Response(data=data)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 

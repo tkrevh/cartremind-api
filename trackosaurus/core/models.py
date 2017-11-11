@@ -5,6 +5,7 @@ import json
 import uuid
 
 import requests
+from django.conf import settings
 from django.db import models
 
 
@@ -132,12 +133,12 @@ class EventNotification(TimedModel):
 
     def get_tracked_url(self, request):
         return '{}://{}{}'.format(
-            request.get_type(),
+            'https' if request.is_secure() else 'http',
             request.get_host(),
             reverse('track-by-redirect', args=(self.id,))
         )
 
-    def send_notification_to_topic(self, request, topic):
+    def send_notification_to_topic(self, request):
         """
         https://fcm.googleapis.com/fcm/send
         Content-Type:application/json
@@ -151,7 +152,7 @@ class EventNotification(TimedModel):
           }
         }
         """
-
+        topic = self.recorded_event.get_topic_name()
         URL = "https://fcm.googleapis.com/fcm/send"
         API_KEY = "AAAAry4xbXQ:APA91bFM6lFskgOsjsPXhdHhdCRA4CafRDw5RNE4RdZjrDeSAgKiTKo0Z9M_spLufLH6rJOUA1xwfnnt0tExqTyig612p3Pu9EiLNcsZj80UHbWA2Dtyu0vyA3jpxblI5vhAgkrQ17dE"
         HEADERS = {
@@ -163,7 +164,7 @@ class EventNotification(TimedModel):
             "notification": {
                 "title": self.title,
                 "body": self.body,
-                "icon": self.icon,
+                "icon": '{}{}'.format(settings.MEDIA_URL, self.icon.url),
                 "click_action": self.get_tracked_url(request)
             },
             "to": '/topics/{}'.format(topic)
@@ -173,6 +174,9 @@ class EventNotification(TimedModel):
         if r.status_code == requests.codes.ok:
             self.number_sent = self.recorded_event.tokens.count()
             self.save()
+            return True
+
+        return False
 
     class Meta:
         verbose_name = 'Event Notification'

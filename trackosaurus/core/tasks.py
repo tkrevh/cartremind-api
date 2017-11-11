@@ -1,15 +1,10 @@
 import json
 import requests
 from django.apps import apps
-import celery
+from celery.decorators import task
 from django.conf import settings
 
-app = celery.Celery('trackosaurus')
-app.conf.update(BROKER_URL=settings.REDIS_URL,
-                CELERY_RESULT_BACKEND=settings.REDIS_URL)
-
-
-@app.task
+@task
 def register_user_to_topic(token, topic):
     API_KEY = "AAAAry4xbXQ:APA91bFM6lFskgOsjsPXhdHhdCRA4CafRDw5RNE4RdZjrDeSAgKiTKo0Z9M_spLufLH6rJOUA1xwfnnt0tExqTyig612p3Pu9EiLNcsZj80UHbWA2Dtyu0vyA3jpxblI5vhAgkrQ17dE"
     HEADERS = {

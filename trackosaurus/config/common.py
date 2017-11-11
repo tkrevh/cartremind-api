@@ -1,5 +1,12 @@
 import os
-import urlparse
+
+try:
+    # Python 2.x
+    import urlparse
+except ImportError:
+    # Python 3.x
+    from urllib import parse as urlparse
+
 from os.path import join
 
 from configurations import Configuration, values

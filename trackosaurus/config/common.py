@@ -1,4 +1,5 @@
 import os
+import urlparse
 from os.path import join
 
 from configurations import Configuration, values
@@ -267,3 +268,22 @@ class Common(Configuration):
 
     # SITE SETTINGS
     HOMEPAGE_URL = 'https://trackosaurus.io'
+
+    # Caching
+    REDIS_URL = urlparse.urlparse(os.environ.get('REDISTOGO_URL', 'redis://127.0.0.1:6379/1'))
+    CACHES = {
+        'default': {
+            'BACKEND': 'redis_cache.RedisCache',
+            'LOCATION': '{}:{}'.format(REDIS_URL.hostname, REDIS_URL.port),
+            'OPTIONS': {
+                'DB': 0,
+                'PASSWORD': REDIS_URL.password,
+                'PARSER_CLASS': 'redis.connection.HiredisParser',
+                'CONNECTION_POOL_CLASS': 'redis.BlockingConnectionPool',
+                'CONNECTION_POOL_CLASS_KWARGS': {
+                    'max_connections': 50,
+                    'timeout': 20,
+                }
+            }
+        }
+    }

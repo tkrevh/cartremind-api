@@ -50,7 +50,7 @@ class RecordedEventAdmin(admin.ModelAdmin):
 @admin.register(RecordedEventToken)
 class RecordedEventTokenAdmin(admin.ModelAdmin):
     list_display = (
-        'campaign', 'recorded_event', 'token', 'date_modified', 'date_created', 'test_notification',
+        'campaign', 'recorded_event', 'subscribed', 'token', 'date_modified', 'date_created', 'test_notification',
     )
 
     def get_list_display(self, request):

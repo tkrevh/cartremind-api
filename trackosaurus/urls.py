@@ -44,7 +44,7 @@ urlpatterns = [
     url(r'^api/v1/login/$', views.obtain_auth_token),
     url(r'^api/v1/userinfo/$', UserInfoView.as_view()),
 
-    url(r'^r/(?P<notification_id>[-\w]+)/$', notification_redirection, name='notification-redirection'),
+    url(r'^r/(?P<notification_id>[-\w]+)/$', notification_redirection, name='track-by-redirect'),
 
     url(r'^send-test-notification/(?P<recorded_event_token_id>\d+)/$', send_test_notification, name='send-test-notification'),
 

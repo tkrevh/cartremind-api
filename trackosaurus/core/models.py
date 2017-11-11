@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import json
 import uuid
 
+import requests
 from django.db import models
 
 
 # Create your models here.
 from core.constants import CAMPAIGN_TYPE_CHOICES
+from django.urls import reverse
 from django.utils.encoding import python_2_unicode_compatible
 
 from .constants import CAMPAIGN_TYPE_OTHER
@@ -88,6 +91,9 @@ class RecordedEvent(TimedModel):
     url = models.TextField(null=False, blank=False, default="http://placeholder")
     page_title = models.CharField(max_length=1204, null=False, blank=False, default='page_title')
 
+    def get_topic_name(self):
+        return '{}-{}'.format(self.event.campaign.id, self.id)
+
     def __str__(self):
         MAX_PAGE_TITLE_DISPLAY_LENGTH = 30
         shortened_page_title = self.page_title
@@ -104,7 +110,8 @@ class RecordedEvent(TimedModel):
 
 class RecordedEventToken(TimedModel):
     recorded_event = models.ForeignKey(RecordedEvent, related_name='tokens', null=False, blank=False)
-    token = models.CharField(max_length=256, null=False, blank=False)
+    token = models.CharField(max_length=256, null=False, blank=False, db_index=True)
+    subscribed = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'Recorded Event Token'
@@ -122,6 +129,50 @@ class EventNotification(TimedModel):
     url = models.TextField(null=False, blank=False)
     number_sent = models.PositiveIntegerField(default=0)
     number_opened = models.PositiveIntegerField(default=0)
+
+    def get_tracked_url(self, request):
+        return '{}://{}{}'.format(
+            request.get_type(),
+            request.get_host(),
+            reverse('track-by-redirect', args=(self.id,))
+        )
+
+    def send_notification_to_topic(self, request, topic):
+        """
+        https://fcm.googleapis.com/fcm/send
+        Content-Type:application/json
+        Authorization:key=AIzaSyZ-1u...0GBYzPu7Udno5aA
+        {
+          "to" : /topics/foo-bar",
+          "priority" : "high",
+          "notification" : {
+            "body" : "This is a Firebase Cloud Messaging Topic Message!",
+            "title" : "FCM Message",
+          }
+        }
+        """
+
+        URL = "https://fcm.googleapis.com/fcm/send"
+        API_KEY = "AAAAry4xbXQ:APA91bFM6lFskgOsjsPXhdHhdCRA4CafRDw5RNE4RdZjrDeSAgKiTKo0Z9M_spLufLH6rJOUA1xwfnnt0tExqTyig612p3Pu9EiLNcsZj80UHbWA2Dtyu0vyA3jpxblI5vhAgkrQ17dE"
+        HEADERS = {
+            "Content-Type": "application/json",
+            "Authorization": "key={}".format(API_KEY)
+        }
+
+        payload = {
+            "notification": {
+                "title": self.title,
+                "body": self.body,
+                "icon": self.icon,
+                "click_action": self.get_tracked_url(request)
+            },
+            "to": '/topics/{}'.format(topic)
+        }
+
+        r = requests.post(URL, data=json.dumps(payload), headers=HEADERS)
+        if r.status_code == requests.codes.ok:
+            self.number_sent = self.recorded_event.tokens.count()
+            self.save()
 
     class Meta:
         verbose_name = 'Event Notification'

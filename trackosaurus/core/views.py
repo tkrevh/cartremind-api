@@ -20,6 +20,7 @@ from rest_framework.views import APIView
 
 from users.permissions import HasAPIAccess
 
+from .tasks import register_user_to_topic
 from .permissions import IsOwner, IsOwnerOfCampaign
 from .serializers import (
     CampaignEventSerializer,
@@ -48,7 +49,9 @@ class RecordEventView(APIView):
                 page_title=page_title
             )
         except (IntegrityError, ValidationError):
-            obj = RecordedEvent.objects.get(
+            obj = RecordedEvent.objects.prefetch_related(
+                'event', 'event__campaign'
+            ).get(
                 event=campaign_event,
                 url=url
             )
@@ -92,6 +95,7 @@ class RecordEventView(APIView):
                     recorded_event=recorded_event,
                     token=token
                 )
+                register_user_to_topic.delay(token, recorded_event.get_topic_name())
             except IntegrityError:
                 # don't allow duplicate registrations
                 pass
@@ -293,6 +297,7 @@ class PostEventNotificationView(APIView):
         )
         if instance.is_valid():
             event_notification = instance.save()
+
             return Response(
                 data=EventNotificationSerializer(event_notification).data
             )

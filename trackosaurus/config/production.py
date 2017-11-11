@@ -68,14 +68,14 @@ class Production(Common):
     STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
     # Caching
-    redis_url = urlparse.urlparse(os.environ.get('REDISTOGO_URL', 'redis://localhost:6379'))
+    REDIS_URL = urlparse.urlparse(os.environ.get('REDISTOGO_URL', 'redis://127.0.0.1:6379/1'))
     CACHES = {
         'default': {
             'BACKEND': 'redis_cache.RedisCache',
-            'LOCATION': '{}:{}'.format(redis_url.hostname, redis_url.port),
+            'LOCATION': '{}:{}'.format(REDIS_URL.hostname, REDIS_URL.port),
             'OPTIONS': {
                 'DB': 0,
-                'PASSWORD': redis_url.password,
+                'PASSWORD': REDIS_URL.password,
                 'PARSER_CLASS': 'redis.connection.HiredisParser',
                 'CONNECTION_POOL_CLASS': 'redis.BlockingConnectionPool',
                 'CONNECTION_POOL_CLASS_KWARGS': {
@@ -85,7 +85,6 @@ class Production(Common):
             }
         }
     }
-
     # Django RQ production settings
     RQ_QUEUES = {
         'default': {

@@ -8,6 +8,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 class Local(Common):
 
     DEBUG = values.BooleanValue(True)
+    CELERY_ALWAYS_EAGER = True
     for config in Common.TEMPLATES:
         config['OPTIONS']['debug'] = DEBUG
 

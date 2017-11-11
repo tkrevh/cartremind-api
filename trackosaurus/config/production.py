@@ -68,14 +68,15 @@ class Production(Common):
     STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
     # Caching
-    REDIS_URL = urlparse.urlparse(os.environ.get('REDISTOGO_URL', 'redis://127.0.0.1:6379/1'))
+    REDIS_URL = os.environ.get('REDISTOGO_URL', 'redis://127.0.0.1:6379/1')
+    parsed_redis_url = urlparse.urlparse(REDIS_URL)
     CACHES = {
         'default': {
             'BACKEND': 'redis_cache.RedisCache',
-            'LOCATION': '{}:{}'.format(REDIS_URL.hostname, REDIS_URL.port),
+            'LOCATION': '{}:{}'.format(parsed_redis_url.hostname, parsed_redis_url.port),
             'OPTIONS': {
                 'DB': 0,
-                'PASSWORD': REDIS_URL.password,
+                'PASSWORD': parsed_redis_url.password,
                 'PARSER_CLASS': 'redis.connection.HiredisParser',
                 'CONNECTION_POOL_CLASS': 'redis.BlockingConnectionPool',
                 'CONNECTION_POOL_CLASS_KWARGS': {

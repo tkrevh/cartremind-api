@@ -264,3 +264,6 @@ class Common(Configuration):
 
     # CORS SETTINGS
     CORS_ORIGIN_ALLOW_ALL = True
+
+    # SITE SETTINGS
+    HOMEPAGE_URL = 'https://trackosaurus.io'

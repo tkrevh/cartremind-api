@@ -69,7 +69,7 @@ class CampaignEvent(TimedModel):
     type = models.PositiveIntegerField(choices=CAMPAIGN_TYPE_CHOICES, default=CAMPAIGN_TYPE_OTHER)
 
     def __str__(self):
-        return self.name
+        return '{}({})'.format(self.name, self.campaign.name)
 
     class Meta:
         verbose_name = 'Campaign Event'

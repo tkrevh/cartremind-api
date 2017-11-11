@@ -14,10 +14,11 @@ from core.views import (
     ListCampaignEventsView,
     send_test_notification,
     CampaignEventViewSet,
-    DashboardView
-)
+    DashboardView,
+    CampaignStatisticsView,
+    PostEventNotificationView, EventNotificationView)
 from users.views import UserViewSet, RegisterUserView, UserInfoView
-from core.views import CampaignViewSet
+from core.views import CampaignViewSet, notification_redirection
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet)
@@ -35,10 +36,15 @@ urlpatterns = [
     url(r'^api/v1/events/(?P<campaign>[-\w]+)/$', ListCampaignEventsView.as_view()),
     url(r'^api/v1/campaigns/(?P<campaign>[-\w]+)/', include(campaign_events_router.urls)),
     url(r'^api/v1/dashboard/$', DashboardView.as_view()),
+    url(r'^api/v1/campaignstatistics/$', CampaignStatisticsView.as_view()),
+    url(r'^api/v1/notify/(?P<recorded_event_id>[-\w]+)/$', PostEventNotificationView.as_view()),
+    url(r'^api/v1/notifications/$', EventNotificationView.as_view()),
 
     url(r'^api/v1/register/$', RegisterUserView.as_view()),
     url(r'^api/v1/login/$', views.obtain_auth_token),
     url(r'^api/v1/userinfo/$', UserInfoView.as_view()),
+
+    url(r'^r/(?P<notification_id>[-\w]+)/$', notification_redirection, name='notification-redirection'),
 
     url(r'^send-test-notification/(?P<recorded_event_token_id>\d+)/$', send_test_notification, name='send-test-notification'),
 

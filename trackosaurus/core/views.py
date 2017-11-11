@@ -5,9 +5,12 @@ import json
 
 from django.core.exceptions import ValidationError
 from django.db import transaction, IntegrityError
+from django.db.models import Count
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.contrib import messages
 from django.shortcuts import redirect
+from django.conf import settings
 
 from rest_framework import status, mixins, viewsets
 from rest_framework.generics import ListAPIView
@@ -21,9 +24,16 @@ from .permissions import IsOwner, IsOwnerOfCampaign
 from .serializers import (
     CampaignEventSerializer,
     CampaignSerializer,
-    CreateCampaignSerializer
+    CreateCampaignSerializer,
+    RecordedEventSerializer,
+    EventNotificationSerializer, CreateEventNotificationSerializer)
+from .models import (
+    RecordedEvent,
+    CampaignEvent,
+    Campaign,
+    RecordedEventToken,
+    EventNotification
 )
-from .models import RecordedEvent, CampaignEvent, Campaign, RecordedEventToken
 
 
 # Create your views here.
@@ -131,12 +141,6 @@ def send_test_notification(request, recorded_event_token_id):
 
 
 class DashboardView(APIView):
-    """
-    View to list all users in the system.
-
-    * Requires token authentication.
-    * Only admin users are able to access this view.
-    """
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, format=None):
@@ -146,14 +150,43 @@ class DashboardView(APIView):
         number_of_campaigns = user_campaigns.count()
         campaign_events = CampaignEvent.objects.filter(campaign__in=user_campaigns)
         number_of_campaign_events = campaign_events.count()
-        number_of_registered_signups = RecordedEvent.objects.filter(event__in=campaign_events).count()
-
+        number_of_registered_signups = RecordedEventToken.objects.filter(recorded_event__event__in=campaign_events).count()
+        number_of_sent_notifications = EventNotification.objects.filter(recorded_event__event__campaign__user=user).count()
         data = {
             'number_of_campaigns': number_of_campaigns,
             'number_of_campaign_events': number_of_campaign_events,
             'number_of_registered_signups': number_of_registered_signups,
-            'number_of_sent_notifications': 0
+            'number_of_sent_notifications': number_of_sent_notifications,
+            'max_subscribers': user.subscribers_limit
         }
+
+        return Response(data)
+
+
+class CampaignStatisticsView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, format=None):
+        user = request.user
+
+        user_campaigns = Campaign.objects.filter(user=user).prefetch_related(
+            'campaign_events', 'campaign_events__recorded_events'
+        )
+
+        campaing_statistics = []
+        for campaign in user_campaigns:
+            campaign_events = campaign.campaign_events.all()
+            recorded_events = RecordedEvent.objects.filter(
+                event__in=campaign_events
+            ).annotate(
+                subscribers=Count('tokens')
+            ).order_by('-subscribers')
+            campaing_statistics.append({
+                'name': campaign.name,
+                'events': RecordedEventSerializer(recorded_events, many=True).data
+            })
+
+        data = campaing_statistics
 
         return Response(data)
 
@@ -211,3 +244,70 @@ class CampaignEventViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(campaign=Campaign.objects.get(id=self.kwargs['campaign']))
+
+
+class EventNotificationView(APIView):
+    queryset = EventNotification.objects.all()
+    serializer_class = EventNotificationSerializer
+    permission_classes = (IsOwner,)
+
+    def get(self, request):
+
+        qs = EventNotification.objects.filter(
+            recorded_event__event__campaign__user=self.request.user
+        ).select_related('recorded_event').prefetch_related(
+            'recorded_event__event__campaign'
+        ).order_by('-date_created')
+
+        data = EventNotificationSerializer(qs, many=True).data
+
+        return Response(data)
+
+
+class PostEventNotificationView(APIView):
+    queryset = EventNotification.objects.all()
+    serializer_class = CreateEventNotificationSerializer
+    permission_classes = (IsOwner,)
+
+    def post(self, request, recorded_event_id):
+        user = self.request.user
+
+        try:
+            recorded_event = RecordedEvent.objects.prefetch_related(
+                'event', 'event__campaign',
+            ).get(
+                id=recorded_event_id,
+                event__campaign__user=user
+            )
+        except RecordedEvent.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        data = {
+            'recorded_event': recorded_event_id,
+            'number_sent': recorded_event.tokens.count()
+        }
+        data.update(request.data)
+
+        instance = CreateEventNotificationSerializer(
+            data=data
+        )
+        if instance.is_valid():
+            event_notification = instance.save()
+            return Response(
+                data=EventNotificationSerializer(event_notification).data
+            )
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+def notification_redirection(request, notification_id):
+
+    try:
+        notification = EventNotification.objects.get(id=notification_id)
+    except EventNotification.DoesNotExist:
+        return HttpResponseRedirect(settings.HOMEPAGE_URL)
+
+    notification.number_opened += 1
+    notification.save()
+
+    return HttpResponseRedirect(notification.url)

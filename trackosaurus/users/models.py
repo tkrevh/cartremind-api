@@ -30,6 +30,7 @@ class APIKey(models.Model):
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     api_key = models.OneToOneField(APIKey, null=True, related_name='user', on_delete=models.CASCADE)
+    subscribers_limit = models.PositiveIntegerField(default=1000)
 
     def save(self, *args, **kwargs):
 

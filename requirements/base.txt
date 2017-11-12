@@ -44,6 +44,7 @@ urllib3==1.22
 requests==2.18.4
 
 # Celery
+six==1.10.0
 amqp==1.4.9
 billiard==3.3.0.23
 celery==3.1.23

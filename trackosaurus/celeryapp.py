@@ -3,11 +3,12 @@ from __future__ import absolute_import
 import os
 from celery import Celery
 # from hirefire.procs.celery import CeleryProc
-from django.conf import settings
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "trackosaurus.config")
 os.environ.setdefault("DJANGO_CONFIGURATION", "Production")
 #os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trackosaurus.config.production')
+
+from django.conf import settings
 
 from configurations import importer
 importer.install()

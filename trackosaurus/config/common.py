@@ -207,6 +207,16 @@ class Common(Configuration):
                 'level': 'DEBUG',
                 'propagate': True,
             },
+            'trackosaurus.core': {
+                'handlers': ['console'],
+                'level': 'DEBUG',
+                'propagate': True,
+            },
+            'trackosaurus': {
+                'handlers': ['console'],
+                'level': 'DEBUG',
+                'propagate': True,
+            },
         }
     }
 

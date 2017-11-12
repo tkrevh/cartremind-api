@@ -51,4 +51,4 @@ celery==3.1.23
 kombu==3.0.37
 
 # Opbeat
-opbeat==3.3
+opbeat==3.4

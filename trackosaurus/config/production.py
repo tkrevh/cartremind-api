@@ -57,6 +57,8 @@ class Production(Common):
     MEDIA_URL = 'https://s3.amazonaws.com/{}/'.format(AWS_STORAGE_BUCKET_NAME)
     AWS_S3_CALLING_FORMAT = OrdinaryCallingFormat()
     AWS_S3_REGION_NAME = values.Value('DJANGO_AWS_S3_REGION_NAME')
+    AWS_S3_HOST = values.Value('DJANGO_AWS_S3_HOST')
+    
 
     # https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching#cache-control
     # Response can be cached by browser and any intermediary caches (i.e. it is "public") for up to 1 day

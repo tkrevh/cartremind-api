@@ -160,12 +160,13 @@ class EventNotification(TimedModel):
             "Authorization": "key={}".format(API_KEY)
         }
 
+        icon_url = '{}{}'.format(settings.MEDIA_URL, self.icon.url)
         payload = {
             "notification": {
                 "title": self.title,
                 "body": self.body,
-                "icon": '{}{}'.format(settings.MEDIA_URL, self.icon.url),
-                "click_action": self.get_tracked_url(request)
+                "icon": icon_url,
+                "click_action": icon_url # self.get_tracked_url(request)
             },
             "to": '/topics/{}'.format(topic)
         }

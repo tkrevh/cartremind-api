@@ -28,7 +28,7 @@ class Common(Configuration):
         # Third party apps
         'rest_framework',            # utilities for rest apis
         'rest_framework.authtoken',  # token authentication
-        'django_rq',                 # asynchronous queuing
+        # 'django_rq',                 # asynchronous queuing
         'versatileimagefield',       # image manipulation
         'corsheaders',               # Cross Origin Resource Sharing Headers
 
@@ -277,8 +277,8 @@ class Common(Configuration):
     HOMEPAGE_URL = 'https://trackosaurus.io'
 
     # Caching
-    REDIS_URL = os.environ.get('REDISTOGO_URL', 'redis://127.0.0.1:6379/1')
-    parsed_redis_url = urlparse.urlparse(os.environ.get('REDISTOGO_URL', 'redis://127.0.0.1:6379/1'))
+    REDIS_URL = os.environ.get('REDISCLOUD_URL', 'redis://127.0.0.1:6379/1')
+    parsed_redis_url = urlparse.urlparse(os.environ.get('REDISCLOUD_URL', 'redis://127.0.0.1:6379/1'))
     CACHES = {
         'default': {
             'BACKEND': 'redis_cache.RedisCache',

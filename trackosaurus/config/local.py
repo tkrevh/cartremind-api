@@ -37,7 +37,7 @@ class Local(Common):
     # Django RQ local settings
     RQ_QUEUES = {
         'default': {
-            'URL': os.getenv('REDISTOGO_URL', 'redis://localhost:6379'),
+            'URL': os.getenv('REDISCLOUD_URL', 'redis://localhost:6379'),
             'DB': 0,
             'DEFAULT_TIMEOUT': 500,
         },

@@ -68,7 +68,7 @@ class Production(Common):
     STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
     # Caching
-    REDIS_URL = os.environ.get('REDISTOGO_URL', 'redis://127.0.0.1:6379/1')
+    REDIS_URL = os.environ.get('REDISCLOUD_URL', 'redis://127.0.0.1:6379/1')
     parsed_redis_url = urlparse.urlparse(REDIS_URL)
     CACHES = {
         'default': {
@@ -89,7 +89,7 @@ class Production(Common):
     # Django RQ production settings
     RQ_QUEUES = {
         'default': {
-            'URL': os.getenv('REDISTOGO_URL', 'redis://localhost:6379'),
+            'URL': os.getenv('REDISCLOUD_URL', 'redis://localhost:6379'),
             'DB': 0,
             'DEFAULT_TIMEOUT': 500,
         },

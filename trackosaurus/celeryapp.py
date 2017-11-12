@@ -13,8 +13,8 @@ from configurations import importer
 importer.install()
 
 app = Celery('trackosaurus')
-app.conf.update(BROKER_URL=os.environ.get('REDISTOGO_URL', 'redis://127.0.0.1:6379/1'),
-                CELERY_RESULT_BACKEND=os.environ.get('REDISTOGO_URL', 'redis://127.0.0.1:6379/1'))
+app.conf.update(BROKER_URL=os.environ.get('REDISCLOUD_URL', 'redis://127.0.0.1:6379/1'),
+                CELERY_RESULT_BACKEND=os.environ.get('REDISCLOUD_URL', 'redis://127.0.0.1:6379/1'))
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 

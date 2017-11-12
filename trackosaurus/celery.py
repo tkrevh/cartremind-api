@@ -1,22 +1,21 @@
 from __future__ import absolute_import
-
 import os
 from celery import Celery
 # from hirefire.procs.celery import CeleryProc
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "trackosaurus.config")
-os.environ.setdefault("DJANGO_CONFIGURATION", "Production")
-#os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trackosaurus.config.production')
+#os.environ.setdefault("DJANGO_SETTINGS_MODULE", "trackosaurus.config")
+#os.environ.setdefault("DJANGO_CONFIGURATION", "Production")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "trackosaurus.config.production")
 
-from django.conf import settings
+# from configurations import importer
+# importer.install()
 
-from configurations import importer
-importer.install()
+# from django.conf import settings
 
 app = Celery('trackosaurus')
 app.conf.update(BROKER_URL=os.environ.get('REDISCLOUD_URL', 'redis://127.0.0.1:6379/1'),
                 CELERY_RESULT_BACKEND=os.environ.get('REDISCLOUD_URL', 'redis://127.0.0.1:6379/1'))
-app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+app.autodiscover_tasks(['trackosaurus.core'], force=True)
 
 
 # class WorkerProc(CeleryProc):

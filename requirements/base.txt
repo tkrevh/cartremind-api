@@ -44,7 +44,8 @@ urllib3==1.22
 requests==2.18.4
 
 # Celery
-amqp==1.4.9
-billiard==3.3.0.23
-celery==3.1.23
-kombu==3.0.35
+amqp==2.2.2
+billiard==3.5.0.3
+celery==4.1.0
+kombu==4.1.0
+vine==1.1.4

@@ -4,7 +4,7 @@ from django.apps import apps
 from celery.decorators import task
 from django.conf import settings
 
-@task(bind=True)
+@task
 def register_user_to_topic(token, topic):
     """
     https://iid.googleapis.com/iid/v1:batchAdd

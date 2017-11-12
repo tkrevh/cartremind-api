@@ -52,7 +52,7 @@ class Common(Configuration):
         'qinspect.middleware.QueryInspectMiddleware',
     )
 
-    ROOT_URLCONF = 'urls'
+    ROOT_URLCONF = 'trackosaurus.urls'
 
     SECRET_KEY = 'Not a secret'
     WSGI_APPLICATION = 'wsgi.application'
@@ -295,3 +295,5 @@ class Common(Configuration):
             }
         }
     }
+
+    BROKER_URL=REDIS_URL

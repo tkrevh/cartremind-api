@@ -35,12 +35,25 @@ class Common(Configuration):
         # Your apps
         'authentication',
         'users',
-        'core'
+        'core',
+
+        # opbeat
+        'opbeat.contrib.django'
 
     )
 
+    OPBEAT_APP_ID = os.environ.get('OPBEAT_APP_ID', None)
+
+    if OPBEAT_APP_ID:
+        OPBEAT = {
+            'ORGANIZATION_ID': os.environ.get('OPBEAT_ORGANIZATION_ID', None),
+            'APP_ID': OPBEAT_APP_ID,
+            'SECRET_TOKEN': os.environ.get('OPBEAT_SECRET_TOKEN', None),
+        }
+
     # https://docs.djangoproject.com/en/1.10/topics/http/middleware/
     MIDDLEWARE = (
+        'opbeat.contrib.django.middleware.OpbeatAPMMiddleware',
         'corsheaders.middleware.CorsMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.middleware.common.CommonMiddleware',
@@ -180,9 +193,28 @@ class Common(Configuration):
             'mail_admins': {
                 'level': 'ERROR',
                 'class': 'django.utils.log.AdminEmailHandler'
-            }
+            },
+            'opbeat': {
+                'level': 'WARNING',
+                'class': 'opbeat.contrib.django.handlers.OpbeatHandler',
+            },
         },
         'loggers': {
+            '': {
+                'handlers': ['console'],
+                'level': 'INFO',
+                'propagate': True,
+            },
+            'trackosaurus.core': {
+                'handlers': ['console'],
+                'level': 'DEBUG',
+                'propagate': True,
+            },
+            'trackosaurus': {
+                'handlers': ['opbeat'],
+                'level': 'WARNING',
+                'propagate': True,
+            },
             'django': {
                 'handlers': ['console'],
                 'propagate': True,
@@ -202,16 +234,6 @@ class Common(Configuration):
                 'level': 'DEBUG'
             },
             'qinspect': {
-                'handlers': ['console'],
-                'level': 'DEBUG',
-                'propagate': True,
-            },
-            'trackosaurus.core': {
-                'handlers': ['console'],
-                'level': 'DEBUG',
-                'propagate': True,
-            },
-            'trackosaurus': {
                 'handlers': ['console'],
                 'level': 'DEBUG',
                 'propagate': True,

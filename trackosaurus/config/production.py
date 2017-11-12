@@ -46,7 +46,7 @@ class Production(Common):
 
     # Media files
     # http://django-storages.readthedocs.org/en/latest/index.html
-    INSTALLED_APPS += ('storages',)
+    INSTALLED_APPS += ('storages', )
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     AWS_ACCESS_KEY_ID = values.Value('DJANGO_AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = values.Value('DJANGO_AWS_SECRET_ACCESS_KEY')

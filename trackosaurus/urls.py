@@ -16,7 +16,8 @@ from core.views import (
     CampaignEventViewSet,
     DashboardView,
     CampaignStatisticsView,
-    PostEventNotificationView, EventNotificationView)
+    PostEventNotificationView, EventNotificationView, MoveEventUpView, MoveEventDownView, AcivateEventView,
+    DeactivateEventView)
 from users.views import UserViewSet, RegisterUserView, UserInfoView
 from core.views import CampaignViewSet, notification_redirection
 
@@ -33,6 +34,10 @@ urlpatterns = [
     url(r'^api/v1/', include('authentication.urls')),
     url(r'^api/v1/', include(router.urls)),
     url(r'^api/v1/record-event/(?P<campaign>[-\w]+)/(?P<event_id>[-\w]+)/$', RecordEventView.as_view()),
+    url(r'^api/v1/move-event-up/(?P<campaign>[-\w]+)/(?P<event_id>[-\w]+)/$', MoveEventUpView.as_view()),
+    url(r'^api/v1/move-event-down/(?P<campaign>[-\w]+)/(?P<event_id>[-\w]+)/$', MoveEventDownView.as_view()),
+    url(r'^api/v1/activate-event/(?P<campaign>[-\w]+)/(?P<event_id>[-\w]+)/$', AcivateEventView.as_view()),
+    url(r'^api/v1/deactivate-event/(?P<campaign>[-\w]+)/(?P<event_id>[-\w]+)/$', DeactivateEventView.as_view()),
     url(r'^api/v1/events/(?P<campaign>[-\w]+)/$', ListCampaignEventsView.as_view()),
     url(r'^api/v1/campaigns/(?P<campaign>[-\w]+)/', include(campaign_events_router.urls)),
     url(r'^api/v1/dashboard/$', DashboardView.as_view()),

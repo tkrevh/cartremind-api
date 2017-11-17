@@ -103,6 +103,138 @@ class RecordEventView(APIView):
         return Response(status=status.HTTP_201_CREATED)
 
 
+class MoveEventUpView(APIView):
+    permission_classes = (IsOwnerOfCampaign, )
+
+    def post(self, request, campaign, event_id, format=None):
+        try:
+            campaign_event = CampaignEvent.objects.get(
+                campaign_id=campaign,
+                pk=event_id
+            )
+        except CampaignEvent.DoesNotExist:
+            return Response(
+                status=status.HTTP_404_BAD_REQUEST,
+                data={
+                    'error': 'Such event does not exist'
+                }
+            )
+
+        if campaign_event.order > 0:
+            neighbour_campaign_event = CampaignEvent.objects.get(
+                campaign_id=campaign,
+                order=campaign_event.order-1
+            )
+            campaign_event.order -= 1
+            neighbour_campaign_event.order += 1
+            campaign_event.save()
+            neighbour_campaign_event.save()
+
+        qs = CampaignEvent.objects.filter(campaign_id=campaign)
+        data = CampaignEventSerializer(qs, many=True).data
+
+        return Response(
+            data=data,
+            status=status.HTTP_202_ACCEPTED
+        )
+
+
+class MoveEventDownView(APIView):
+    permission_classes = (IsOwnerOfCampaign, )
+
+    def post(self, request, campaign, event_id, format=None):
+        try:
+            campaign_event = CampaignEvent.objects.get(
+                campaign_id=campaign,
+                pk=event_id
+            )
+        except CampaignEvent.DoesNotExist:
+            return Response(
+                status=status.HTTP_404_BAD_REQUEST,
+                data={
+                    'error': 'Such event does not exist'
+                }
+            )
+
+        if campaign_event.order < CampaignEvent.objects.filter(campaign_id=campaign).count()-1:
+            neighbour_campaign_event = CampaignEvent.objects.get(
+                campaign_id=campaign,
+                order=campaign_event.order+1
+            )
+            with transaction.atomic():
+                campaign_event.order += 1
+                campaign_event.save()
+                if neighbour_campaign_event.order > 0:
+                    neighbour_campaign_event.order -= 1
+                    neighbour_campaign_event.save()
+
+        qs = CampaignEvent.objects.filter(campaign_id=campaign)
+        data = CampaignEventSerializer(qs, many=True).data
+
+        return Response(
+            data=data,
+            status=status.HTTP_202_ACCEPTED
+        )
+
+
+class AcivateEventView(APIView):
+    permission_classes = (IsOwnerOfCampaign, )
+
+    def post(self, request, campaign, event_id, format=None):
+        try:
+            campaign_event = CampaignEvent.objects.get(
+                campaign_id=campaign,
+                pk=event_id
+            )
+        except CampaignEvent.DoesNotExist:
+            return Response(
+                status=status.HTTP_404_BAD_REQUEST,
+                data={
+                    'error': 'Such event does not exist'
+                }
+            )
+
+        campaign_event.active = True
+        campaign_event.save()
+
+        qs = CampaignEvent.objects.filter(campaign_id=campaign)
+        data = CampaignEventSerializer(qs, many=True).data
+
+        return Response(
+            data=data,
+            status=status.HTTP_202_ACCEPTED
+        )
+
+
+class DeactivateEventView(APIView):
+    permission_classes = (IsOwnerOfCampaign, )
+
+    def post(self, request, campaign, event_id, format=None):
+        try:
+            campaign_event = CampaignEvent.objects.get(
+                campaign_id=campaign,
+                pk=event_id
+            )
+        except CampaignEvent.DoesNotExist:
+            return Response(
+                status=status.HTTP_404_BAD_REQUEST,
+                data={
+                    'error': 'Such event does not exist'
+                }
+            )
+
+        campaign_event.active = False
+        campaign_event.save()
+
+        qs = CampaignEvent.objects.filter(campaign_id=campaign)
+        data = CampaignEventSerializer(qs, many=True).data
+
+        return Response(
+            data=data,
+            status=status.HTTP_202_ACCEPTED
+        )
+
+
 class ListCampaignEventsView(ListAPIView):
     permission_classes = (IsAuthenticated, HasAPIAccess)
 
@@ -111,7 +243,8 @@ class ListCampaignEventsView(ListAPIView):
 
         campaign_events = CampaignEvent.objects.filter(
             campaign_id=campaign,
-            campaign__user=user
+            campaign__user=user,
+            active=True
         )
 
         data = CampaignEventSerializer(campaign_events, many=True).data
@@ -221,7 +354,11 @@ class CampaignViewSet(mixins.CreateModelMixin,
 
     def retrieve(self, request, *args, **kwargs):
         self.permission_classes = (IsOwner,)
-        return super(CampaignViewSet, self).create(request, *args, **kwargs)
+        return super(CampaignViewSet, self).retrieve(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
         self.permission_classes = (IsOwner,)

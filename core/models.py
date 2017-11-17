@@ -34,6 +34,24 @@ class Campaign(TimedModel):
     description = models.TextField(max_length=1024, null=True, blank=True)
     type = models.PositiveIntegerField(choices=CAMPAIGN_TYPE_CHOICES, default=CAMPAIGN_TYPE_OTHER)
 
+    # campaign options
+    # header #
+    header_text = models.CharField(max_length=128, null=True, blank=True)
+    header_text_color = models.CharField(max_length=7, null=True, blank=True)
+    header_font_style = models.CharField(max_length=64, null=True, blank=True)
+
+    # menu #
+    menu_transparent = models.BooleanField(default=True)
+    menu_background_color = models.CharField(max_length=7, null=True, blank=True)
+
+    # default layout #
+    default_layout = models.PositiveIntegerField(default=0)
+    static_heading = models.CharField(max_length=64, null=True, blank=True)
+    static_subheading = models.CharField(max_length=64, null=True, blank=True)
+    static_cta = models.CharField(max_length=64, null=True, blank=True)
+    static_cta_color = models.CharField(max_length=7, null=True, blank=True)
+    static_cta_background = models.CharField(max_length=7, null=True, blank=True)
+
     def __str__(self):
         return '{}'.format(self.name)
 
@@ -71,6 +89,8 @@ class CampaignEvent(TimedModel):
     name = models.CharField(max_length=128, null=False, blank=False)
     description = models.CharField(max_length=128, null=True, blank=True)
     type = models.PositiveIntegerField(choices=CAMPAIGN_TYPE_CHOICES, default=CAMPAIGN_TYPE_OTHER)
+    order = models.PositiveIntegerField(default=0)
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return '{}({})'.format(self.name, self.campaign.name)
@@ -78,7 +98,7 @@ class CampaignEvent(TimedModel):
     class Meta:
         verbose_name = 'Campaign Event'
         verbose_name_plural = 'Campaign Events'
-        ordering = ['-date_created']
+        ordering = ['order']
 
 
 @python_2_unicode_compatible

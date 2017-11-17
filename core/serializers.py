@@ -57,20 +57,26 @@ class CampaignEventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CampaignEvent
-        fields = ('id', 'name', 'description', 'type')
+        fields = ('id', 'name', 'description', 'type', 'order', 'active')
 
 
 class CampaignSerializer(serializers.ModelSerializer):
 
-    campaign_events = CampaignEventSerializer(many=True, read_only=True)
+    campaign_events = serializers.SerializerMethodField()
+
+    def get_campaign_events(self, campaign):
+        events = campaign.campaign_events.filter(active=True)
+        return CampaignEventSerializer(events, many=True).data
 
     class Meta:
         model = Campaign
         fields = (
             'id', 'name', 'base_url', 'description', 'type', 'date_created', 'date_modified',
-            'campaign_events'
+            'campaign_events', 'header_text', 'header_text_color', 'header_font_style',
+            'menu_transparent', 'menu_background_color', 'default_layout', 'static_heading',
+            'static_subheading', 'static_cta', 'static_cta_color', 'static_cta_background',
         )
-        read_only_fields = ('id', )
+        read_only_fields = ('id', 'campaign_events', 'date_created', 'date_modified')
 
 
 class RecordedEventSerializer(serializers.ModelSerializer):

@@ -18,7 +18,9 @@ from core.views import (
     CampaignStatisticsView,
     PostEventNotificationView, EventNotificationView, MoveEventUpView, MoveEventDownView, AcivateEventView,
     DeactivateEventView)
-from users.views import UserViewSet, RegisterUserView, UserInfoView
+from djbraintree.views import BTClientTokenView, BTSubscribeView, BTCancelSubscriptionView, BTWebhook, \
+    BTReactivateSubscriptionView
+from users.views import UserViewSet, RegisterUserView, UserInfoView, UpdateUserInfoView
 from core.views import CampaignViewSet, notification_redirection
 
 router = DefaultRouter()
@@ -48,6 +50,15 @@ urlpatterns = [
     url(r'^api/v1/register/$', RegisterUserView.as_view()),
     url(r'^api/v1/login/$', views.obtain_auth_token),
     url(r'^api/v1/userinfo/$', UserInfoView.as_view()),
+    url(r'^api/v1/userinfo/update/$', UpdateUserInfoView.as_view()),
+
+    # payments
+    url(r'^api/v1/payments/client-token/$', BTClientTokenView.as_view()),
+    url(r'^api/v1/payments/plans/$', BTClientTokenView.as_view()),
+    url(r'^api/v1/payments/subscribe/$', BTSubscribeView.as_view()),
+    url(r'^api/v1/payments/unsubscribe/$', BTCancelSubscriptionView.as_view()),
+    url(r'^api/v1/payments/reactivate/$', BTReactivateSubscriptionView.as_view()),
+    url(r'^api/v1/payments/webhook/$', BTWebhook.as_view()),
 
     url(r'^r/(?P<notification_id>[-\w]+)/$', notification_redirection, name='track-by-redirect'),
 

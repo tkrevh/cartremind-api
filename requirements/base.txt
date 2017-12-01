@@ -52,3 +52,6 @@ kombu==3.0.37
 
 # Opbeat
 opbeat==3.4
+
+# Braintree
+braintree==3.39.0

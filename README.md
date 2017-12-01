@@ -1,7 +1,7 @@
-#trackosaurus
-[![Build Status](https://travis-ci.org/tkrevh/trackosaurus.svg?branch=master)](https://travis-ci.org/tkrevh/trackosaurus)
+#cartremind
+[![Build Status](https://travis-ci.org/tkrevh/cartremind-api.svg?branch=master)](https://travis-ci.org/tkrevh/cartremind-api)
 
-ProductHunt Hackaton project, to track website visitors requests to be notified of specific events on any website. Suitable for eCommerce, SaaS, and other user facing websites and apps.. Check out the project's [documentation](http://tkrevh.github.io/trackosaurus/).
+ProductHunt Hackaton project, to track website visitors requests to be notified of specific events on any website. Suitable for eCommerce, SaaS, and other user facing websites and apps.. Check out the project's [documentation](http://tkrevh.github.io/cartremind-api/).
 
 # Prerequisites
 - [virtualenv](https://virtualenv.pypa.io/en/latest/)
@@ -25,24 +25,24 @@ pip install -r requirements/local.txt
 Create the database:
 
 ```bash
-createdb trackosaurus
+createdb cartremind
 ```
 Initialize the git repository
 
 ```
 git init
-git remote add origin git@github.com:tkrevh/trackosaurus.git
+git remote add origin git@github.com:tkrevh/cartremind-api.git
 ```
 
 Migrate the database and create a superuser:
 ```bash
-python trackosaurus/manage.py migrate
-python trackosaurus/manage.py createsuperuser
+python manage.py migrate
+python manage.py createsuperuser
 ```
 
 Run the development server:
 ```bash
-python trackosaurus/manage.py runserver
+python manage.py runserver
 ```
 
 # Create Servers

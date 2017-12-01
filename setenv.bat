@@ -1,1 +1,1 @@
-\virtualenvs\trackosaurus\Scripts\activate
+\virtualenvs\cartremind\Scripts\activate

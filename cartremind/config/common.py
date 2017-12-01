@@ -1,5 +1,7 @@
 import os
 
+import braintree
+
 try:
     # Python 2.x
     import urlparse
@@ -36,6 +38,7 @@ class Common(Configuration):
         'authentication',
         'users',
         'core',
+        'djbraintree',
 
         # opbeat
         'opbeat.contrib.django'
@@ -65,7 +68,7 @@ class Common(Configuration):
         'qinspect.middleware.QueryInspectMiddleware',
     )
 
-    ROOT_URLCONF = 'trackosaurus.urls'
+    ROOT_URLCONF = 'cartremind.urls'
 
     SECRET_KEY = 'Not a secret'
     WSGI_APPLICATION = 'wsgi.application'
@@ -78,7 +81,7 @@ class Common(Configuration):
     )
 
     # Postgres
-    DATABASES = values.DatabaseURLValue('postgres://postgres:postgres@localhost:5433/trackosaurus')
+    DATABASES = values.DatabaseURLValue('postgres://postgres:postgres@localhost:5433/cartremind')
 
     # General
     APPEND_SLASH = values.BooleanValue(False)
@@ -205,12 +208,12 @@ class Common(Configuration):
                 'level': 'INFO',
                 'propagate': True,
             },
-            'trackosaurus.core': {
+            'cartremind.core': {
                 'handlers': ['console'],
                 'level': 'DEBUG',
                 'propagate': True,
             },
-            'trackosaurus': {
+            'cartremind': {
                 'handlers': ['opbeat'],
                 'level': 'WARNING',
                 'propagate': True,
@@ -305,7 +308,7 @@ class Common(Configuration):
     CORS_ORIGIN_ALLOW_ALL = True
 
     # SITE SETTINGS
-    HOMEPAGE_URL = 'https://trackosaurus.io'
+    HOMEPAGE_URL = 'https://cartremind.com'
 
     # Caching
     REDIS_URL = os.environ.get('REDISCLOUD_URL', 'redis://127.0.0.1:6379/1')
@@ -328,3 +331,15 @@ class Common(Configuration):
     }
 
     BROKER_URL=REDIS_URL
+
+    # Braintree payments config
+    BRAINTREE_PRODUCTION = os.environ.get('DJANGO_BRAINTREE_PRODUCTION', False)
+    BRAINTREE_MERCHANT_ID = os.environ.get('DJANGO_BRAINTREE_MERCHANT_ID', '4zr53xx4325km39x')
+    BRAINTREE_PUBLIC_KEY = os.environ.get('DJANGO_BRAINTREE_PUBLIC_KEY', 'ttbzqj6j7dkfybg6')
+    BRAINTREE_PRIVATE_KEY = os.environ.get('DJANGO_BRAINTREE_PRIVATE_KEY', '9f68f1ebd79d69c74513c6975ac99a9a')
+    braintree.Configuration.configure(
+        braintree.Environment.Production if BRAINTREE_PRODUCTION else braintree.Environment.Sandbox,
+        BRAINTREE_MERCHANT_ID,
+        BRAINTREE_PUBLIC_KEY,
+        BRAINTREE_PRIVATE_KEY
+    )

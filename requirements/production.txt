@@ -1,4 +1,4 @@
-# Dependencies related to deploying trackosaurus
+# Dependencies related to deploying cartremind
 -r base.txt
 
 # WSGI Handler

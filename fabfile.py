@@ -7,15 +7,17 @@ from fabric.colors import cyan
 from fabric.operations import prompt
 
 current_dir = os.getcwd()
-env.project_name = 'trackosaurus'
+env.project_name = 'cartremind'
 env.branch = 'master'
-env.environments = ['dev',
-                    'qa',
-                    'prod']
+# env.environments = ['dev', 'qa', 'prod']
+env.environments = ['qa', 'prod']
+                    
+AWS_ACCESS_KEY_ID='AKIAIBVJT6JBB32ZSBPQ'
+AWS_SECRET_ACCESS_KEY='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'
 
 
 def serve():
-    local('python {}/manage.py runserver'.format(env.project_name))
+    local('python manage.py runserver')
 
 
 def test():
@@ -24,7 +26,7 @@ def test():
     """
     local('flake8 {}'.format(env.project_name))
     print cyan('flake8 passed!', bold=True)
-    local('python {}/manage.py test'.format(env.project_name))
+    local('python manage.py test')
 
 
 def init():
@@ -32,7 +34,7 @@ def init():
     Deploys servers
     """
     print cyan('Initializing...', bold=True)
-    set_remotes()
+    # set_remotes()
     ask_for_aws_keys()
     for environment in env.environments:
         env.environment = environment
@@ -57,8 +59,10 @@ def ask_for_aws_keys():
     """
     Gets AWS keys from user
     """
-    env.aws_access = prompt('AWS_ACCESS_KEY_ID?')
-    env.aws_secret = prompt('AWS_SECRET_ACCESS_KEY?')
+    # env.aws_access = prompt('AWS_ACCESS_KEY_ID?')
+    # env.aws_secret = prompt('AWS_SECRET_ACCESS_KEY?')
+    env.aws_access = AWS_ACCESS_KEY_ID
+    env.aws_secret = AWS_SECRET_ACCESS_KEY
 
 
 def create_standard_server():
@@ -83,8 +87,14 @@ def create_server():
 
     print cyan('Creating new server'.format(env.project_name, env.environment))
     require('environment')
-    local('heroku create {}-{} --buildpack https://github.com/heroku/heroku-buildpack-python'
+    local('heroku create --stack cedar-14 {}-{} '
           .format(env.project_name, env.environment))
+    local('heroku buildpacks:add https://github.com/beanieboi/nginx-buildpack.git --remote {}'
+          .format(env.environment))
+    local('heroku buildpacks:add https://github.com/heroku/heroku-buildpack-pgbouncer --remote {}'
+          .format(env.environment))
+    local('heroku buildpacks:add https://github.com/heroku/heroku-buildpack-python --remote {}'
+          .format(env.environment))
 
 
 def configure_sever():
@@ -94,9 +104,10 @@ def configure_sever():
     require('environment')
     local('heroku addons:create heroku-postgresql --remote {}'.format(env.environment))
     local('heroku pg:backups schedule DATABASE --at "04:00 UTC" --remote {}'.format(env.environment))
-    local('heroku pg:promote DATABASE_URL --remote {}'.format(env.environment))
-    local('heroku addons:create redistogo:nano --remote {}'.format(env.environment))
+    # local('heroku pg:promote DATABASE_URL --remote {}'.format(env.environment))
+    local('heroku addons:create rediscloud:30 --remote {}'.format(env.environment))
     local('heroku addons:create newrelic:wayne --remote {}'.format(env.environment))
+    local('heroku addons:create papertrail:choklad --remote {}'.format(env.environment))
     local('heroku config:set NEW_RELIC_APP_NAME="{}" --remote {}'.format(env.project_name, env.environment))
     local('heroku config:set DJANGO_CONFIGURATION=Production --remote {}'.format(env.environment))
     local('heroku config:set DJANGO_SECRET_KEY="{}" --remote {}'.format(create_secret_key(), env.environment))

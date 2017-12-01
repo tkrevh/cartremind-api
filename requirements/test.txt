@@ -1,4 +1,4 @@
-# Dependencies related to testing trackosaurus
+# Dependencies related to testing cartremind
 -r base.txt
 
 # Mocking

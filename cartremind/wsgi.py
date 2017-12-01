@@ -1,5 +1,5 @@
 """
-WSGI config for trackosaurus project.
+WSGI config for cartremind project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
